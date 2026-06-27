@@ -1,6 +1,5 @@
 version: 2
 
-
 sources:
   - name: staging_source
     database: dezc-project-496112
