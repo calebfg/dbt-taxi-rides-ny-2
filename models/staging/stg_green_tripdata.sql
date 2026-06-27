@@ -1,6 +1,7 @@
 {{ config(materialized='view') }}
 
 select
+    {{ dbt_utils.generate_surrogate_key(['vendorid', 'lpep_pickup_datetime', 'pulocationid', 'dolocationid']) }} as tripid,
     -- identifiers
     cast(vendorid as integer) as vendorid,
     cast(ratecodeid as integer) as ratecodeid,
