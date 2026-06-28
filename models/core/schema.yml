@@ -1,0 +1,69 @@
+version: 2
+
+models:
+  - name: fact_trips
+    description: >
+      Taxi trips corresponding to both green and yellow service types.
+      The table contains records where both pickup and dropoff locations 
+      are valid taxi zones. Combines 2019-2020 data for both service types.
+    columns:
+      - name: tripid
+        description: Primary key for this table, generated with a concatenation of vendorid+pickup_datetime+pickup_locationid+dropoff_locationid
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: service_type
+        description: Identifies whether the trip was made by a green or yellow taxi
+      - name: pickup_locationid
+        description: locationid where the meter was engaged
+      - name: pickup_zone
+        description: Human readable zone name where the trip started
+      - name: dropoff_locationid
+        description: locationid where the meter was disengaged
+      - name: dropoff_zone
+        description: Human readable zone name where the trip ended
+      - name: payment_type_description
+        description: Human readable description of the payment type
+
+  - name: dim_zones
+    description: >
+      List of unique zones where taxi trips can start or end,
+      enriched with borough and service zone information.
+      Built from the taxi_zone_lookup seed file.
+    columns:
+      - name: locationid
+        description: Primary key, unique identifier for each taxi zone
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: borough
+        description: NYC borough where the zone is located
+      - name: zone
+        description: Human readable name of the taxi zone
+      - name: service_zone
+        description: Type of service zone. Boro Zone renamed to Green Zone to reflect green taxi service areas.
+
+  - name: dm_monthly_zone_revenue
+    description: >
+      Aggregated table of revenue metrics grouped by service type, 
+      pickup zone, and month. Pre-aggregated for dashboard consumption.
+      Reduces 115M fact_trips rows to ~12,500 rows for fast BI queries.
+    columns:
+      - name: revenue_month
+        description: First day of the month for which revenue is aggregated
+      - name: revenue_zone
+        description: Pickup zone for the aggregated trips
+      - name: service_type
+        description: Green or Yellow taxi service type
+      - name: total_monthly_trips
+        description: Count of trips in that zone and month combination
+      - name: revenue_monthly_total_amount
+        description: Sum of total_amount for all trips in that zone and month
