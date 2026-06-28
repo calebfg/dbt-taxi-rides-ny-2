@@ -1,0 +1,97 @@
+version: 2
+
+sources:
+  - name: staging_source
+    database: dezc-project-496112
+    schema: nytaxi
+
+    tables:
+      - name: green_tripdata
+      - name: yellow_tripdata
+
+models:
+  - name: stg_green_tripdata
+    description: >
+      Trip made by green taxis, also known as boro taxis and street-hail liveries.
+      The green taxi service was created in August 2013 to improve taxi service and 
+      availability in the outer boroughs.
+    columns:
+      - name: tripid
+        description: Primary key for this table, generated with a concatenation of vendorid+pickup_datetime+pickup_locationid+dropoff_locationid
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: pickup_locationid
+        description: locationid where the meter was engaged
+        tests:
+          - relationships:
+              config:
+                severity: warn
+              arguments:
+                to: ref('taxi_zone_lookup')
+                field: locationid
+      - name: dropoff_locationid
+        description: locationid where the meter was disengaged
+        tests:
+          - relationships:
+              config:
+                severity: warn
+              arguments:
+                to: ref('taxi_zone_lookup')
+                field: locationid
+      - name: payment_type_description
+        description: Human readable description of the payment type
+        tests:
+          - accepted_values:
+              config:
+                severity: warn
+              arguments:
+                values: "{{ var('payment_type_values') }}"
+                quote: false
+
+  - name: stg_yellow_tripdata
+    description: >
+      Trips made by New York City's iconic yellow taxis. 
+      Yellow taxis are the only vehicles permitted to respond to a street hail 
+      from a passenger in all five boroughs.
+    columns:
+      - name: tripid
+        description: Primary key for this table, generated with a concatenation of vendorid+pickup_datetime+pickup_locationid+dropoff_locationid
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: pickup_locationid
+        description: locationid where the meter was engaged
+        tests:
+          - relationships:
+              config:
+                severity: warn
+              arguments:
+                to: ref('taxi_zone_lookup')
+                field: locationid
+      - name: dropoff_locationid
+        description: locationid where the meter was disengaged
+        tests:
+          - relationships:
+              config:
+                severity: warn
+              arguments:
+                to: ref('taxi_zone_lookup')
+                field: locationid
+      - name: payment_type_description
+        description: Human readable description of the payment type
+        tests:
+          - accepted_values:
+              config:
+                severity: warn
+              arguments:
+                values: "{{ var('payment_type_values') }}"
+                quote: false
